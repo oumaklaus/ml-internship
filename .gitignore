@@ -27,6 +27,9 @@ outputs/*.csv
 # your experiments live in work/; datasets never enter git
 work/**/*.csv
 
+# --- Local-only session handoff (never pushed) -----------------------------
+PROGRESS.md
+
 # --- Python / notebooks ----------------------------------------------------
 __pycache__/
 *.py[cod]
