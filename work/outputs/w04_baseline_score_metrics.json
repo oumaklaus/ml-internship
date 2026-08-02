@@ -1,0 +1,27 @@
+{
+  "task": "ML-07 w04_baseline_score",
+  "lane": "Refresh / Content Opportunity Scoring",
+  "panel_month": "2026-03",
+  "label_month": "2026-04",
+  "n_pages": 176738,
+  "base_decline_rate": 0.5319,
+  "rule": "score = age_days if (mar_impr >= 50 and age_days >= 90) else 0",
+  "reason_code": "stale_but_visible",
+  "action": "review_for_refresh",
+  "n_flagged": 77589,
+  "signal_verdicts": {
+    "staleness_refresh_flag": "CONFIRMED",
+    "volume_quick_win": "MIXED"
+  },
+  "precision_at_k": {
+    "10": 0.9,
+    "50": 0.96,
+    "100": 0.94,
+    "500": 0.946
+  },
+  "weak_picks": {
+    "thin_traffic_share_under_150_impr": 0.203,
+    "top100_largest_client_share": 1.0
+  },
+  "csv": "work/outputs/baseline_action_score.csv (gitignored, regenerated each run)"
+}
