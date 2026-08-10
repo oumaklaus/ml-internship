@@ -1,0 +1,121 @@
+{
+  "task": "ML-08 w05_model",
+  "lane": "Refresh / Content Opportunity Scoring",
+  "panel_month": "2026-03",
+  "label_month": "2026-04",
+  "n_pages": 176738,
+  "n_clients": 47,
+  "base_decline_rate": 0.5319,
+  "validation": "GroupKFold(n_splits=5) grouped by client_hash_id",
+  "split_honesty": {
+    "random_split_auc": 0.6436,
+    "grouped_split_auc": 0.5548,
+    "inflation": 0.0889
+  },
+  "features_static": [
+    "mar_impr",
+    "mar_clicks",
+    "ctr",
+    "avg_position",
+    "days_with_impr",
+    "age_days"
+  ],
+  "features_momentum": [
+    "mom_impr",
+    "mom_clicks",
+    "h1_impr",
+    "h2_impr"
+  ],
+  "excluded_as_future": [
+    "apr_impr",
+    "decline",
+    "content_updated_date",
+    "last_optimized_date",
+    "optimization_eligible_date"
+  ],
+  "mean_over_folds": {
+    "dummy": {
+      "AUC": 0.499,
+      "PR_AUC": 0.531,
+      "p@10": 0.7,
+      "p@50": 0.56,
+      "p@100": 0.552,
+      "p@500": 0.539
+    },
+    "baseline_w04": {
+      "AUC": 0.532,
+      "PR_AUC": 0.579,
+      "p@10": 0.52,
+      "p@50": 0.572,
+      "p@100": 0.614,
+      "p@500": 0.622
+    },
+    "logreg_static": {
+      "AUC": 0.522,
+      "PR_AUC": 0.554,
+      "p@10": 0.58,
+      "p@50": 0.56,
+      "p@100": 0.586,
+      "p@500": 0.593
+    },
+    "logreg_momentum": {
+      "AUC": 0.573,
+      "PR_AUC": 0.593,
+      "p@10": 0.82,
+      "p@50": 0.796,
+      "p@100": 0.79,
+      "p@500": 0.743
+    },
+    "rf_momentum": {
+      "AUC": 0.671,
+      "PR_AUC": 0.672,
+      "p@10": 0.9,
+      "p@50": 0.82,
+      "p@100": 0.79,
+      "p@500": 0.753
+    }
+  },
+  "std_over_folds": {
+    "dummy": {
+      "AUC": 0.003,
+      "PR_AUC": 0.081,
+      "p@10": 0.245,
+      "p@50": 0.164,
+      "p@100": 0.126,
+      "p@500": 0.084
+    },
+    "baseline_w04": {
+      "AUC": 0.132,
+      "PR_AUC": 0.122,
+      "p@10": 0.427,
+      "p@50": 0.4,
+      "p@100": 0.35,
+      "p@500": 0.34
+    },
+    "logreg_static": {
+      "AUC": 0.092,
+      "PR_AUC": 0.088,
+      "p@10": 0.179,
+      "p@50": 0.086,
+      "p@100": 0.128,
+      "p@500": 0.195
+    },
+    "logreg_momentum": {
+      "AUC": 0.09,
+      "PR_AUC": 0.095,
+      "p@10": 0.13,
+      "p@50": 0.122,
+      "p@100": 0.115,
+      "p@500": 0.151
+    },
+    "rf_momentum": {
+      "AUC": 0.064,
+      "PR_AUC": 0.102,
+      "p@10": 0.173,
+      "p@50": 0.148,
+      "p@100": 0.14,
+      "p@500": 0.196
+    }
+  },
+  "headline": "rf_momentum beats the frozen ML-07 rule on the same grouped folds; the rule's Week 4 precision@50 of 0.96 falls to roughly 0.57 once it is scored against unseen clients"
+}
