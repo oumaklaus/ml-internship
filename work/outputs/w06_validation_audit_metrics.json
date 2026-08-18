@@ -1,0 +1,229 @@
+{
+  "task": "ML-09 w06_validation_audit",
+  "lane": "Refresh / Content Opportunity Scoring",
+  "paper": "FlyRank, The State of AI-Driven SEO, March 2026",
+  "paper_findings_audited": [
+    {
+      "finding": "#4 The Freshness Multiplier (p9)",
+      "question": "selection: refreshed pages were chosen, so the 57x mixes refreshing with choosing; health also contains impressions, so the 3.2x and 57x overlap by construction"
+    },
+    {
+      "finding": "#2 The Content Performance Curve (p7)",
+      "question": "cross sectional snapshot read as a within page lifecycle; active content filter makes the old buckets survivors"
+    }
+  ],
+  "panels": {
+    "panel_1": {
+      "features": "2026-03",
+      "label": "2026-04",
+      "decision_day": "2026-03-31",
+      "pages": 176738,
+      "clients": 47,
+      "base_rate": 0.5319
+    },
+    "panel_2": {
+      "features": "2026-04",
+      "label": "2026-05",
+      "decision_day": "2026-04-30",
+      "pages": 194760,
+      "clients": 51,
+      "base_rate": 0.503
+    }
+  },
+  "split_ladder_mean": [
+    {
+      "design": "1 random, Mar>Apr",
+      "model": "baseline_w04",
+      "AUC": 0.513,
+      "PR_AUC": 0.532,
+      "p@50": 0.968,
+      "p@500": 0.623,
+      "test_base": 0.532
+    },
+    {
+      "design": "1 random, Mar>Apr",
+      "model": "rf_momentum",
+      "AUC": 0.763,
+      "PR_AUC": 0.773,
+      "p@50": 0.972,
+      "p@500": 0.938,
+      "test_base": 0.532
+    },
+    {
+      "design": "2 grouped, Mar>Apr",
+      "model": "baseline_w04",
+      "AUC": 0.532,
+      "PR_AUC": 0.579,
+      "p@50": 0.568,
+      "p@500": 0.622,
+      "test_base": 0.532
+    },
+    {
+      "design": "2 grouped, Mar>Apr",
+      "model": "rf_momentum",
+      "AUC": 0.671,
+      "PR_AUC": 0.673,
+      "p@50": 0.892,
+      "p@500": 0.774,
+      "test_base": 0.532
+    },
+    {
+      "design": "3 time fwd, Apr>May",
+      "model": "baseline_w04",
+      "AUC": 0.509,
+      "PR_AUC": 0.483,
+      "p@50": 0.58,
+      "p@500": 0.578,
+      "test_base": 0.503
+    },
+    {
+      "design": "3 time fwd, Apr>May",
+      "model": "rf_momentum",
+      "AUC": 0.69,
+      "PR_AUC": 0.698,
+      "p@50": 0.98,
+      "p@500": 0.972,
+      "test_base": 0.503
+    },
+    {
+      "design": "4 grouped+time fwd",
+      "model": "baseline_w04",
+      "AUC": 0.512,
+      "PR_AUC": 0.507,
+      "p@50": 0.324,
+      "p@500": 0.383,
+      "test_base": 0.509
+    },
+    {
+      "design": "4 grouped+time fwd",
+      "model": "rf_momentum",
+      "AUC": 0.679,
+      "PR_AUC": 0.673,
+      "p@50": 0.916,
+      "p@500": 0.867,
+      "test_base": 0.509
+    }
+  ],
+  "split_ladder_std": [
+    {
+      "design": "1 random, Mar>Apr",
+      "model": "baseline_w04",
+      "AUC": 0.002,
+      "PR_AUC": 0.002,
+      "p@50": 0.027,
+      "p@500": 0.009,
+      "test_base": 0.0
+    },
+    {
+      "design": "1 random, Mar>Apr",
+      "model": "rf_momentum",
+      "AUC": 0.003,
+      "PR_AUC": 0.003,
+      "p@50": 0.033,
+      "p@500": 0.011,
+      "test_base": 0.0
+    },
+    {
+      "design": "2 grouped, Mar>Apr",
+      "model": "baseline_w04",
+      "AUC": 0.132,
+      "PR_AUC": 0.122,
+      "p@50": 0.405,
+      "p@500": 0.34,
+      "test_base": 0.08
+    },
+    {
+      "design": "2 grouped, Mar>Apr",
+      "model": "rf_momentum",
+      "AUC": 0.064,
+      "PR_AUC": 0.102,
+      "p@50": 0.108,
+      "p@500": 0.182,
+      "test_base": 0.08
+    },
+    {
+      "design": "3 time fwd, Apr>May",
+      "model": "baseline_w04",
+      "AUC": null,
+      "PR_AUC": null,
+      "p@50": null,
+      "p@500": null,
+      "test_base": null
+    },
+    {
+      "design": "3 time fwd, Apr>May",
+      "model": "rf_momentum",
+      "AUC": null,
+      "PR_AUC": null,
+      "p@50": null,
+      "p@500": null,
+      "test_base": null
+    },
+    {
+      "design": "4 grouped+time fwd",
+      "model": "baseline_w04",
+      "AUC": 0.08,
+      "PR_AUC": 0.109,
+      "p@50": 0.187,
+      "p@500": 0.166,
+      "test_base": 0.083
+    },
+    {
+      "design": "4 grouped+time fwd",
+      "model": "rf_momentum",
+      "AUC": 0.063,
+      "PR_AUC": 0.118,
+      "p@50": 0.089,
+      "p@500": 0.109,
+      "test_base": 0.083
+    }
+  ],
+  "leakage_audit": {
+    "positive_control_auc_with_label_ingredient": 0.9749,
+    "honest_auc_same_fold": 0.6428,
+    "auc_without_mom_impr": 0.6159,
+    "auc_static_only": 0.5802,
+    "auc_decoupled_label_may_vs_apr": 0.661,
+    "decoupled_base_rate": 0.5433,
+    "momentum_quartile_direction": [
+      {
+        "mom_impr": "Q1 lowest",
+        "n": 39638,
+        "orig_label_decline": 0.677,
+        "decoupled_label_decline": 0.476
+      },
+      {
+        "mom_impr": "Q2",
+        "n": 39637,
+        "orig_label_decline": 0.548,
+        "decoupled_label_decline": 0.517
+      },
+      {
+        "mom_impr": "Q3",
+        "n": 39637,
+        "orig_label_decline": 0.401,
+        "decoupled_label_decline": 0.547
+      },
+      {
+        "mom_impr": "Q4 highest",
+        "n": 39637,
+        "orig_label_decline": 0.287,
+        "decoupled_label_decline": 0.632
+      }
+    ],
+    "momentum_finding": "decline rate falls across March momentum quartiles under the April label and rises under the decoupled May label; the direction inverts, so a stable AUC across the two labels does not vindicate the persistence reading of momentum",
+    "excluded_columns": {
+      "content_updated_date": "382739/519606 dated after 2026-03-31; single snapshot value per page so the March era value is unrecoverable",
+      "last_optimized_date": "45396/45396 non null values after 2026-03-31",
+      "optimization_eligible_date": "45396/45396 non null values after 2026-03-31"
+    },
+    "population_filter": "gsc_data_available IS TRUE and at least one impression in the feature month; a survivor filter, measured as not age neutral"
+  },
+  "claim_language": [
+    "observed",
+    "measured",
+    "associated with",
+    "directional",
+    "decision support"
+  ]
+}
