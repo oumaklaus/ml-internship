@@ -1,0 +1,695 @@
+{
+  "task": "ML-10 w07_action_playbook",
+  "lane": "Refresh / Content Opportunity Scoring",
+  "decision_month": "2026-06",
+  "model": {
+    "spec": "RandomForestClassifier(n_estimators=200, min_samples_leaf=100, random_state=42)",
+    "features": [
+      "impr",
+      "clicks",
+      "ctr",
+      "avg_position",
+      "days_with_impr",
+      "age_days",
+      "mom_impr",
+      "mom_clicks",
+      "h1_impr",
+      "h2_impr"
+    ],
+    "trained_on": "P3, 2026-05 features and a 2026-06 label",
+    "label": "next month impressions below 0.8 x this month impressions",
+    "calibrated": false,
+    "score_use": "ranking only, never a threshold"
+  },
+  "panels": [
+    {
+      "panel": "P1",
+      "features": "2026-03",
+      "label": "2026-04",
+      "decision_day": "2026-03-31",
+      "pages": 176738,
+      "clients": 47,
+      "base_decline_rate": 0.5319
+    },
+    {
+      "panel": "P2",
+      "features": "2026-04",
+      "label": "2026-05",
+      "decision_day": "2026-04-30",
+      "pages": 194760,
+      "clients": 51,
+      "base_decline_rate": 0.503
+    },
+    {
+      "panel": "P3",
+      "features": "2026-05",
+      "label": "2026-06",
+      "decision_day": "2026-05-31",
+      "pages": 237910,
+      "clients": 56,
+      "base_decline_rate": 0.7258
+    },
+    {
+      "panel": "LIVE",
+      "features": "2026-06",
+      "label": "none yet",
+      "decision_day": "2026-06-30",
+      "pages": 208636,
+      "clients": 55,
+      "base_decline_rate": NaN
+    }
+  ],
+  "forward_tests_mean": [
+    {
+      "pair": "pair 1: train Mar>Apr, test Apr>May",
+      "model": "baseline_w04",
+      "AUC": 0.512,
+      "PR_AUC": 0.507,
+      "p@500": 0.383,
+      "test_base": 0.509,
+      "test_rows": 38410.0
+    },
+    {
+      "pair": "pair 1: train Mar>Apr, test Apr>May",
+      "model": "rf_momentum",
+      "AUC": 0.679,
+      "PR_AUC": 0.673,
+      "p@500": 0.867,
+      "test_base": 0.509,
+      "test_rows": 38410.0
+    },
+    {
+      "pair": "pair 2: train Apr>May, test May>Jun",
+      "model": "baseline_w04",
+      "AUC": 0.483,
+      "PR_AUC": 0.715,
+      "p@500": 0.626,
+      "test_base": 0.724,
+      "test_rows": 46397.8
+    },
+    {
+      "pair": "pair 2: train Apr>May, test May>Jun",
+      "model": "rf_momentum",
+      "AUC": 0.658,
+      "PR_AUC": 0.827,
+      "p@500": 0.919,
+      "test_base": 0.724,
+      "test_rows": 46397.8
+    }
+  ],
+  "forward_tests_std": [
+    {
+      "pair": "pair 1: train Mar>Apr, test Apr>May",
+      "model": "baseline_w04",
+      "AUC": 0.08,
+      "PR_AUC": 0.109,
+      "p@500": 0.166,
+      "test_base": 0.083,
+      "test_rows": 4109.889
+    },
+    {
+      "pair": "pair 1: train Mar>Apr, test Apr>May",
+      "model": "rf_momentum",
+      "AUC": 0.063,
+      "PR_AUC": 0.118,
+      "p@500": 0.109,
+      "test_base": 0.083,
+      "test_rows": 4109.889
+    },
+    {
+      "pair": "pair 2: train Apr>May, test May>Jun",
+      "model": "baseline_w04",
+      "AUC": 0.073,
+      "PR_AUC": 0.079,
+      "p@500": 0.206,
+      "test_base": 0.045,
+      "test_rows": 5126.924
+    },
+    {
+      "pair": "pair 2: train Apr>May, test May>Jun",
+      "model": "rf_momentum",
+      "AUC": 0.032,
+      "PR_AUC": 0.027,
+      "p@500": 0.02,
+      "test_base": 0.045,
+      "test_rows": 5126.924
+    }
+  ],
+  "archetype_definitions": [
+    {
+      "archetype": "1 not_live",
+      "action": "drop_from_queue",
+      "reason_code": "page_not_live",
+      "condition": "is_published is false or is_deleted is true"
+    },
+    {
+      "archetype": "2 no_baseline",
+      "action": "human_look_no_rec",
+      "reason_code": "no_first_half_baseline",
+      "condition": "first half impressions equal zero"
+    },
+    {
+      "archetype": "3 thin_traffic",
+      "action": "no_action",
+      "reason_code": "below_measurement_floor",
+      "condition": "impressions below 50"
+    },
+    {
+      "archetype": "4 slipping_workhorse",
+      "action": "refresh_senior_review",
+      "reason_code": "high_traffic_falling_within_month",
+      "condition": "impressions at least 500 and mom_impr below 0.8"
+    },
+    {
+      "archetype": "5 stale_but_visible",
+      "action": "queue_for_refresh",
+      "reason_code": "aged_visible_and_flat_or_down",
+      "condition": "age at least 90 days and mom_impr below 1.0"
+    },
+    {
+      "archetype": "6 position_stuck",
+      "action": "on_page_optimisation",
+      "reason_code": "ranks_just_off_first_page",
+      "condition": "average position between 11.0 and 25.0"
+    },
+    {
+      "archetype": "7 ctr_gap",
+      "action": "title_snippet_review",
+      "reason_code": "visible_but_low_click_share",
+      "condition": "average position at most 10 and ctr below 0.15 percent"
+    },
+    {
+      "archetype": "8 young_climbing",
+      "action": "monitor_only",
+      "reason_code": "too_young_to_judge",
+      "condition": "age below 90 days and mom_impr at least 1.0"
+    },
+    {
+      "archetype": "9 steady",
+      "action": "no_action",
+      "reason_code": "no_trigger_matched",
+      "condition": "no earlier condition matched"
+    }
+  ],
+  "archetype_evaluation": "first match wins in the listed order, so a later condition inherits every earlier exclusion, including the 50 impression floor",
+  "archetype_rates_out_of_fold": [
+    {
+      "archetype": "1 not_live",
+      "pages": 4291,
+      "share_of_pages": 0.018,
+      "median_impr": 2.0,
+      "impressions": 70273.0,
+      "decline_rate": 0.934,
+      "lift_vs_base": 1.29,
+      "mean_score": 0.337
+    },
+    {
+      "archetype": "2 no_baseline",
+      "pages": 43119,
+      "share_of_pages": 0.181,
+      "median_impr": 1.0,
+      "impressions": 2558831.0,
+      "decline_rate": 0.69,
+      "lift_vs_base": 0.95,
+      "mean_score": 0.263
+    },
+    {
+      "archetype": "3 thin_traffic",
+      "pages": 62141,
+      "share_of_pages": 0.261,
+      "median_impr": 13.0,
+      "impressions": 1047329.0,
+      "decline_rate": 0.822,
+      "lift_vs_base": 1.13,
+      "mean_score": 0.53
+    },
+    {
+      "archetype": "4 slipping_workhorse",
+      "pages": 16316,
+      "share_of_pages": 0.069,
+      "median_impr": 1412.0,
+      "impressions": 52500573.0,
+      "decline_rate": 0.853,
+      "lift_vs_base": 1.18,
+      "mean_score": 0.691
+    },
+    {
+      "archetype": "5 stale_but_visible",
+      "pages": 34550,
+      "share_of_pages": 0.145,
+      "median_impr": 241.0,
+      "impressions": 50731320.0,
+      "decline_rate": 0.798,
+      "lift_vs_base": 1.1,
+      "mean_score": 0.517
+    },
+    {
+      "archetype": "6 position_stuck",
+      "pages": 22698,
+      "share_of_pages": 0.095,
+      "median_impr": 387.0,
+      "impressions": 28876286.0,
+      "decline_rate": 0.611,
+      "lift_vs_base": 0.84,
+      "mean_score": 0.441
+    },
+    {
+      "archetype": "7 ctr_gap",
+      "pages": 8145,
+      "share_of_pages": 0.034,
+      "median_impr": 269.0,
+      "impressions": 27230421.0,
+      "decline_rate": 0.649,
+      "lift_vs_base": 0.89,
+      "mean_score": 0.523
+    },
+    {
+      "archetype": "8 young_climbing",
+      "pages": 9978,
+      "share_of_pages": 0.042,
+      "median_impr": 596.0,
+      "impressions": 23468693.0,
+      "decline_rate": 0.45,
+      "lift_vs_base": 0.62,
+      "mean_score": 0.376
+    },
+    {
+      "archetype": "9 steady",
+      "pages": 36672,
+      "share_of_pages": 0.154,
+      "median_impr": 344.0,
+      "impressions": 79681173.0,
+      "decline_rate": 0.619,
+      "lift_vs_base": 0.85,
+      "mean_score": 0.394
+    }
+  ],
+  "archetype_rates_measured_on": "P3, held out clients, base rate 0.7258",
+  "capacity_curve": [
+    {
+      "order": "queue priority",
+      "pages_reviewed": 25,
+      "review_hours": 8.3,
+      "share_reviewed_that_declined": 0.92,
+      "at_risk_impr_reached": 3064786,
+      "share_of_at_risk_reached": 0.0257
+    },
+    {
+      "order": "queue priority",
+      "pages_reviewed": 50,
+      "review_hours": 16.7,
+      "share_reviewed_that_declined": 0.84,
+      "at_risk_impr_reached": 4910203,
+      "share_of_at_risk_reached": 0.0412
+    },
+    {
+      "order": "queue priority",
+      "pages_reviewed": 100,
+      "review_hours": 33.3,
+      "share_reviewed_that_declined": 0.84,
+      "at_risk_impr_reached": 8069971,
+      "share_of_at_risk_reached": 0.0677
+    },
+    {
+      "order": "queue priority",
+      "pages_reviewed": 200,
+      "review_hours": 66.7,
+      "share_reviewed_that_declined": 0.81,
+      "at_risk_impr_reached": 12096136,
+      "share_of_at_risk_reached": 0.1014
+    },
+    {
+      "order": "queue priority",
+      "pages_reviewed": 500,
+      "review_hours": 166.7,
+      "share_reviewed_that_declined": 0.812,
+      "at_risk_impr_reached": 20864150,
+      "share_of_at_risk_reached": 0.1749
+    },
+    {
+      "order": "queue priority",
+      "pages_reviewed": 1000,
+      "review_hours": 333.3,
+      "share_reviewed_that_declined": 0.808,
+      "at_risk_impr_reached": 30336292,
+      "share_of_at_risk_reached": 0.2544
+    },
+    {
+      "order": "queue priority",
+      "pages_reviewed": 2000,
+      "review_hours": 666.7,
+      "share_reviewed_that_declined": 0.81,
+      "at_risk_impr_reached": 42850321,
+      "share_of_at_risk_reached": 0.3593
+    },
+    {
+      "order": "model score alone",
+      "pages_reviewed": 25,
+      "review_hours": 8.3,
+      "share_reviewed_that_declined": 1.0,
+      "at_risk_impr_reached": 119670,
+      "share_of_at_risk_reached": 0.001
+    },
+    {
+      "order": "model score alone",
+      "pages_reviewed": 50,
+      "review_hours": 16.7,
+      "share_reviewed_that_declined": 1.0,
+      "at_risk_impr_reached": 218560,
+      "share_of_at_risk_reached": 0.0018
+    },
+    {
+      "order": "model score alone",
+      "pages_reviewed": 100,
+      "review_hours": 33.3,
+      "share_reviewed_that_declined": 0.95,
+      "at_risk_impr_reached": 353406,
+      "share_of_at_risk_reached": 0.003
+    },
+    {
+      "order": "model score alone",
+      "pages_reviewed": 200,
+      "review_hours": 66.7,
+      "share_reviewed_that_declined": 0.94,
+      "at_risk_impr_reached": 607850,
+      "share_of_at_risk_reached": 0.0051
+    },
+    {
+      "order": "model score alone",
+      "pages_reviewed": 500,
+      "review_hours": 166.7,
+      "share_reviewed_that_declined": 0.93,
+      "at_risk_impr_reached": 1501025,
+      "share_of_at_risk_reached": 0.0126
+    },
+    {
+      "order": "model score alone",
+      "pages_reviewed": 1000,
+      "review_hours": 333.3,
+      "share_reviewed_that_declined": 0.934,
+      "at_risk_impr_reached": 3283489,
+      "share_of_at_risk_reached": 0.0275
+    },
+    {
+      "order": "model score alone",
+      "pages_reviewed": 2000,
+      "review_hours": 666.7,
+      "share_reviewed_that_declined": 0.923,
+      "at_risk_impr_reached": 5084603,
+      "share_of_at_risk_reached": 0.0426
+    },
+    {
+      "order": "frozen Week 4 rule",
+      "pages_reviewed": 25,
+      "review_hours": 8.3,
+      "share_reviewed_that_declined": 0.96,
+      "at_risk_impr_reached": 57685,
+      "share_of_at_risk_reached": 0.0005
+    },
+    {
+      "order": "frozen Week 4 rule",
+      "pages_reviewed": 50,
+      "review_hours": 16.7,
+      "share_reviewed_that_declined": 0.94,
+      "at_risk_impr_reached": 76990,
+      "share_of_at_risk_reached": 0.0006
+    },
+    {
+      "order": "frozen Week 4 rule",
+      "pages_reviewed": 100,
+      "review_hours": 33.3,
+      "share_reviewed_that_declined": 0.95,
+      "at_risk_impr_reached": 94862,
+      "share_of_at_risk_reached": 0.0008
+    },
+    {
+      "order": "frozen Week 4 rule",
+      "pages_reviewed": 200,
+      "review_hours": 66.7,
+      "share_reviewed_that_declined": 0.955,
+      "at_risk_impr_reached": 112362,
+      "share_of_at_risk_reached": 0.0009
+    },
+    {
+      "order": "frozen Week 4 rule",
+      "pages_reviewed": 500,
+      "review_hours": 166.7,
+      "share_reviewed_that_declined": 0.754,
+      "at_risk_impr_reached": 522857,
+      "share_of_at_risk_reached": 0.0044
+    },
+    {
+      "order": "frozen Week 4 rule",
+      "pages_reviewed": 1000,
+      "review_hours": 333.3,
+      "share_reviewed_that_declined": 0.631,
+      "at_risk_impr_reached": 1296849,
+      "share_of_at_risk_reached": 0.0109
+    },
+    {
+      "order": "frozen Week 4 rule",
+      "pages_reviewed": 2000,
+      "review_hours": 666.7,
+      "share_reviewed_that_declined": 0.609,
+      "at_risk_impr_reached": 2008562,
+      "share_of_at_risk_reached": 0.0168
+    },
+    {
+      "order": "impressions only",
+      "pages_reviewed": 25,
+      "review_hours": 8.3,
+      "share_reviewed_that_declined": 0.72,
+      "at_risk_impr_reached": 3180893,
+      "share_of_at_risk_reached": 0.0267
+    },
+    {
+      "order": "impressions only",
+      "pages_reviewed": 50,
+      "review_hours": 16.7,
+      "share_reviewed_that_declined": 0.72,
+      "at_risk_impr_reached": 5256710,
+      "share_of_at_risk_reached": 0.0441
+    },
+    {
+      "order": "impressions only",
+      "pages_reviewed": 100,
+      "review_hours": 33.3,
+      "share_reviewed_that_declined": 0.66,
+      "at_risk_impr_reached": 7826030,
+      "share_of_at_risk_reached": 0.0656
+    },
+    {
+      "order": "impressions only",
+      "pages_reviewed": 200,
+      "review_hours": 66.7,
+      "share_reviewed_that_declined": 0.685,
+      "at_risk_impr_reached": 12302909,
+      "share_of_at_risk_reached": 0.1032
+    },
+    {
+      "order": "impressions only",
+      "pages_reviewed": 500,
+      "review_hours": 166.7,
+      "share_reviewed_that_declined": 0.714,
+      "at_risk_impr_reached": 21246804,
+      "share_of_at_risk_reached": 0.1781
+    },
+    {
+      "order": "impressions only",
+      "pages_reviewed": 1000,
+      "review_hours": 333.3,
+      "share_reviewed_that_declined": 0.733,
+      "at_risk_impr_reached": 31247617,
+      "share_of_at_risk_reached": 0.262
+    },
+    {
+      "order": "impressions only",
+      "pages_reviewed": 2000,
+      "review_hours": 666.7,
+      "share_reviewed_that_declined": 0.733,
+      "at_risk_impr_reached": 43652513,
+      "share_of_at_risk_reached": 0.366
+    }
+  ],
+  "drift": [
+    {
+      "panel": "P1 2026-03",
+      "pages": 176738,
+      "clients": 47,
+      "median_impr": 173.0,
+      "share_thin": 0.343,
+      "share_no_baseline": 0.1401,
+      "share_not_live": NaN,
+      "median_mom_impr": 1.2222,
+      "median_age_days": 193.0,
+      "mean_p_decline": NaN,
+      "base_decline_rate": 0.5319
+    },
+    {
+      "panel": "P2 2026-04",
+      "pages": 194760,
+      "clients": 51,
+      "median_impr": 141.0,
+      "share_thin": 0.3543,
+      "share_no_baseline": 0.1175,
+      "share_not_live": 0.0009,
+      "median_mom_impr": 0.8957,
+      "median_age_days": 177.0,
+      "mean_p_decline": 0.5843,
+      "base_decline_rate": 0.503
+    },
+    {
+      "panel": "P3 2026-05",
+      "pages": 237910,
+      "clients": 56,
+      "median_impr": 80.0,
+      "share_thin": 0.4379,
+      "share_no_baseline": 0.1985,
+      "share_not_live": 0.018,
+      "median_mom_impr": 1.1316,
+      "median_age_days": 171.0,
+      "mean_p_decline": 0.4513,
+      "base_decline_rate": 0.7258
+    },
+    {
+      "panel": "LIVE 2026-06",
+      "pages": 208636,
+      "clients": 55,
+      "median_impr": 91.0,
+      "share_thin": 0.4216,
+      "share_no_baseline": 0.1121,
+      "share_not_live": 0.0487,
+      "median_mom_impr": 0.8469,
+      "median_age_days": 176.0,
+      "mean_p_decline": 0.7145,
+      "base_decline_rate": NaN
+    }
+  ],
+  "monitor_triggers": [
+    {
+      "watch": "input",
+      "signal": "share of pages below the 50 impression floor",
+      "now": "0.422",
+      "observed_range": "0.343 to 0.438",
+      "trigger": "outside the observed range by more than 0.05",
+      "then": "check the month is complete before anything else"
+    },
+    {
+      "watch": "input",
+      "signal": "share of pages with no first half baseline",
+      "now": "0.112",
+      "observed_range": "0.112 to 0.199",
+      "trigger": "outside the observed range by more than 0.05",
+      "then": "expect the no_baseline exclusion to change size, review the routing"
+    },
+    {
+      "watch": "input",
+      "signal": "median impressions per page, scored month vs training month",
+      "now": "91 vs 80",
+      "observed_range": "ratio 1.14",
+      "trigger": "ratio outside 0.75 to 1.33",
+      "then": "refit before scoring, do not ship the queue"
+    },
+    {
+      "watch": "input",
+      "signal": "share of scored pages the catalogue calls not live",
+      "now": "0.049",
+      "observed_range": "one month only",
+      "trigger": "doubles month over month",
+      "then": "check the catalogue export, not the model"
+    },
+    {
+      "watch": "label",
+      "signal": "base decline rate of the newest labelled pair",
+      "now": "0.726",
+      "observed_range": "0.503 to 0.726",
+      "trigger": "outside the observed range by more than 0.05",
+      "then": "expect queue precision to move with it, say so before anyone reads the queue"
+    },
+    {
+      "watch": "score",
+      "signal": "mean p_decline, scored month vs training month",
+      "now": "0.714 vs 0.451",
+      "observed_range": "gap 0.263",
+      "trigger": "gap above 0.05",
+      "then": "inputs moved, refit and rerun the drift table"
+    },
+    {
+      "watch": "ranking",
+      "signal": "forward AUC on the newest labelled pair",
+      "now": "0.658",
+      "observed_range": "0.658 to 0.679",
+      "trigger": "below 0.60, or below the frozen rule plus 0.05",
+      "then": "stop shipping the model queue, fall back to the frozen rule, investigate"
+    },
+    {
+      "watch": "ranking",
+      "signal": "forest AUC minus frozen rule AUC on the same rows",
+      "now": "0.175",
+      "observed_range": "0.167 to 0.175",
+      "trigger": "at or below zero for two consecutive pairs",
+      "then": "retire the model, the rule is cheaper and a person can read it"
+    },
+    {
+      "watch": "process",
+      "signal": "share of queue rows reviewed and signed off",
+      "now": "not measurable yet",
+      "observed_range": "needs the review log",
+      "trigger": "below 0.5 for two months",
+      "then": "the queue is too long, cut it to capacity"
+    },
+    {
+      "watch": "process",
+      "signal": "reviewer agreement with the reason code",
+      "now": "not measurable yet",
+      "observed_range": "needs the review log",
+      "trigger": "below 0.7",
+      "then": "the archetype thresholds are wrong, not the ranking"
+    }
+  ],
+  "queue": {
+    "rows": 82877,
+    "clients": 47,
+    "share_of_live_pages": 0.3972,
+    "rows_by_action": {
+      "queue_for_refresh": 38187,
+      "refresh_senior_review": 25072,
+      "on_page_optimisation": 12530,
+      "title_snippet_review": 7088
+    },
+    "ranked_by": "priority = p_decline x impressions, ranked inside each client"
+  },
+  "assumptions": {
+    "review_minutes_per_page": 20,
+    "review_minutes_source": "assumption, not measured in this data",
+    "value_per_visit": "client specific, deliberately not assumed",
+    "paid_media_equivalent": "clicks x cpc, only for rows carrying a market cpc"
+  },
+  "no_go": [
+    "automatic edits or publishing",
+    "automatic deletion, redirects, or noindexing",
+    "p_decline quoted as a chance or forecast",
+    "cross client league tables",
+    "action below the measurement floor or without a first half baseline",
+    "budget or pricing decisions from the priority column",
+    "any causal sentence about refreshing",
+    "autopilot on a model older than two months",
+    "reruns nobody reads the monitoring table for"
+  ],
+  "claim_language": [
+    "observed",
+    "measured",
+    "associated with",
+    "directional",
+    "decision support"
+  ],
+  "exports": {
+    "queue_csv": "work/outputs/w07_action_queue.csv (gitignored, regenerated by this run)",
+    "metrics_json": "work/outputs/w07_action_playbook_metrics.json",
+    "figures": [
+      "work/figures/w07_priority_curve.png",
+      "work/figures/w07_archetype_rates.png",
+      "work/figures/w07_forward_stability.png"
+    ]
+  }
+}
