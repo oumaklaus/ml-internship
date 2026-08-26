@@ -5,7 +5,7 @@ is typed in by hand, so the paper cannot drift from the run that produced it.
 """
 import json, os, shutil, html, pathlib
 
-ROOT = pathlib.Path("/home/zuko/ml-internship")
+ROOT = pathlib.Path(__file__).resolve().parent.parent   # the repo, wherever it is checked out
 M = json.loads(pathlib.Path(os.environ.get("W08_METRICS",
     ROOT / "work/outputs/w08_capstone_metrics.json")).read_text())
 DOCS = pathlib.Path(os.environ.get("W08_DOCS", ROOT / "docs"))
@@ -159,88 +159,120 @@ to lose search impressions next month, and turns the ranking into a review queue
 row. Built on the FlyRank ML Internship dataset.">
 <style>
 :root{{
-  --bg:#fbfbfa; --panel:#fff; --ink:#1a1d21; --dim:#5c6672; --line:#e2e6ea;
-  --accent:#2b6cb0; --accent-soft:#ebf3fb; --warn:#9c4221; --warn-soft:#fdf3ec; --good:#22543d;
+  /* sampled off the FlyRank internship portal: dark teal chrome, mint tints, white cards */
+  --ink:#0d2426; --body:#33454a; --dim:#57646a;
+  --canvas:#f2f2f1; --mint:#eaf7ef; --mint-2:#e5fbf1; --panel:#fff;
+  --line:#e2e6e4; --line-2:#e5f3eb;
+  --teal:#0f5d52; --teal-deep:#153a33; --cream:#fffbea; --amber:#8a5a08;
   --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
 }}
-@media (prefers-color-scheme:dark){{
-  :root{{--bg:#15171a; --panel:#1c1f23; --ink:#e8eaed; --dim:#9aa4b0; --line:#2c3138;
-        --accent:#7cb3e8; --accent-soft:#1d2733; --warn:#e8a87c; --warn-soft:#2a201a; --good:#8ed1a8;}}
-}}
 *{{box-sizing:border-box}}
-body{{margin:0;background:var(--bg);color:var(--ink);
-  font:16px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+body{{margin:0;background:var(--canvas);color:var(--body);
+  font:16px/1.66 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
   -webkit-text-size-adjust:100%}}
 .wrap{{max-width:790px;margin:0 auto;padding:0 20px 80px}}
-header{{padding:56px 0 30px;border-bottom:1px solid var(--line);margin-bottom:36px}}
-.kicker{{font-size:12px;letter-spacing:.09em;text-transform:uppercase;color:var(--dim);
-  font-weight:600;margin-bottom:14px}}
-h1{{font-size:clamp(27px,5.1vw,40px);line-height:1.16;margin:0 0 18px;letter-spacing:-.019em;font-weight:700}}
-.byline{{color:var(--dim);font-size:14.5px;margin:0}}
-h2{{font-size:clamp(20px,3.4vw,25px);margin:56px 0 4px;letter-spacing:-.012em;line-height:1.25;
-  scroll-margin-top:20px}}
-h2 .sn{{color:var(--accent);font-variant-numeric:tabular-nums;margin-right:.45em;font-weight:600}}
-h3{{font-size:17px;margin:34px 0 8px;letter-spacing:-.005em}}
+
+/* masthead runs full bleed, echoing the portal's dark teal sidebar */
+.mast{{background:linear-gradient(160deg,#153a33 0%,#102c2b 52%,#0d2426 100%);
+  color:#fff;padding:52px 20px 44px}}
+.mast-in{{max-width:790px;margin:0 auto}}
+.kicker{{font-size:11.5px;letter-spacing:.11em;text-transform:uppercase;color:#8fd6b6;
+  font-weight:700;margin-bottom:15px}}
+.mast h1{{font-size:clamp(27px,5.1vw,41px);line-height:1.14;margin:0 0 17px;letter-spacing:-.021em;
+  font-weight:700;color:#fff}}
+.byline{{color:#c3d9d1;font-size:15px;margin:0;max-width:62ch}}
+.chips{{display:flex;flex-wrap:wrap;gap:7px;margin-top:22px}}
+.chip{{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.07);
+  border:1px solid rgba(180,230,205,.26);border-radius:6px;padding:4px 10px;font-size:12.5px;
+  color:#dcefe6}}
+.chip b{{color:#8fd6b6;font-weight:600}}
+.mint-band{{height:3px;background:linear-gradient(90deg,#8fd6b6,#e5fbf1 60%,var(--canvas))}}
+
+h2{{font-size:clamp(20px,3.4vw,25px);margin:58px 0 4px;letter-spacing:-.013em;line-height:1.25;
+  color:var(--ink);scroll-margin-top:20px;font-weight:700}}
+h2 .sn{{display:inline-flex;align-items:center;justify-content:center;width:1.62em;height:1.62em;
+  background:var(--mint);color:var(--teal-deep);border-radius:6px;font-size:.66em;font-weight:700;
+  margin-right:.62em;vertical-align:.14em;font-variant-numeric:tabular-nums}}
+h3{{font-size:17px;margin:34px 0 8px;letter-spacing:-.005em;color:var(--ink);font-weight:650}}
 h2+p,h3+p{{margin-top:10px}}
 p{{margin:0 0 16px}}
-a{{color:var(--accent)}}
-code{{font-family:var(--mono);font-size:.885em;background:var(--accent-soft);
+b,strong{{color:var(--ink)}}
+a{{color:var(--teal);text-decoration-thickness:1px;text-underline-offset:2px}}
+code{{font-family:var(--mono);font-size:.875em;background:var(--mint);color:#12463c;
   padding:1.5px 5px;border-radius:4px;white-space:nowrap}}
-.abstract{{background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--accent);
-  border-radius:8px;padding:22px 24px;margin:0 0 8px}}
+
+.abstract{{background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--teal);
+  border-radius:9px;padding:23px 25px;margin:34px 0 8px}}
 .abstract p{{margin:0}}
-.abstract .lbl{{font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);
+.abstract .lbl{{font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--teal);
   font-weight:700;display:block;margin-bottom:9px}}
+
 figure{{margin:26px 0 30px}}
-figure img{{width:100%;height:auto;display:block;border:1px solid var(--line);border-radius:8px;
+figure img{{width:100%;height:auto;display:block;border:1px solid var(--line);border-radius:9px;
   background:#fff}}
-figcaption{{font-size:14.5px;color:var(--ink);margin-top:11px;padding-left:13px;
-  border-left:3px solid var(--accent)}}
+figcaption{{font-size:14.5px;color:var(--body);margin-top:12px;padding-left:13px;
+  border-left:3px solid var(--mint-2)}}
 figcaption b{{font-weight:650}}
-.tw{{overflow-x:auto;margin:20px 0 26px;-webkit-overflow-scrolling:touch}}
+
+.tw{{overflow-x:auto;margin:20px 0 26px;-webkit-overflow-scrolling:touch;background:var(--panel);
+  border:1px solid var(--line);border-radius:9px}}
 table{{border-collapse:collapse;width:100%;font-size:14.5px;min-width:520px}}
-th,td{{text-align:left;padding:8px 11px;border-bottom:1px solid var(--line);vertical-align:top}}
-th{{font-size:12px;letter-spacing:.045em;text-transform:uppercase;color:var(--dim);font-weight:650;
-  border-bottom:1.5px solid var(--line);white-space:nowrap}}
+th,td{{text-align:left;padding:9px 13px;border-bottom:1px solid var(--line-2);vertical-align:top}}
+tr:last-child td{{border-bottom:0}}
+th{{font-size:11.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--teal-deep);
+  font-weight:700;background:var(--mint);white-space:nowrap;border-bottom:1px solid #d6ebde}}
 td.num,th.num{{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}}
 td.dim,.dim{{color:var(--dim)}}
 .small{{font-size:13px;line-height:1.45}}
-.sd{{color:var(--dim);font-size:12px;font-weight:400}}
-tr.hi td{{background:var(--accent-soft)}}
 tr.rec td{{font-weight:500}}
-tr.rec code{{background:var(--accent);color:#fff}}
-.callout{{background:var(--warn-soft);border:1px solid var(--line);border-left:3px solid var(--warn);
-  border-radius:8px;padding:17px 20px;margin:24px 0}}
+tr.rec code{{background:var(--teal-deep);color:#eafaf2}}
+
+.callout{{background:var(--cream);border:1px solid #f0e6c2;border-left:3px solid var(--amber);
+  border-radius:9px;padding:18px 21px;margin:24px 0}}
 .callout p:last-child{{margin-bottom:0}}
-.callout .lbl{{font-size:11.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--warn);
+.callout .lbl{{font-size:11.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--amber);
   font-weight:700;display:block;margin-bottom:7px}}
+.callout.mint{{background:var(--mint);border-color:#cfe8da;border-left-color:var(--teal)}}
+.callout.mint .lbl{{color:var(--teal)}}
+
 .stats{{display:grid;grid-template-columns:repeat(auto-fit,minmax(132px,1fr));gap:11px;margin:24px 0 28px}}
-.stat{{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:14px 15px}}
+.stat{{background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:15px 16px}}
 .stat .v{{font-size:24px;font-weight:700;letter-spacing:-.02em;font-variant-numeric:tabular-nums;
-  line-height:1.1}}
+  line-height:1.1;color:var(--ink)}}
 .stat .k{{font-size:12.5px;color:var(--dim);margin-top:5px;line-height:1.35}}
+
 ul,ol{{margin:0 0 18px;padding-left:23px}}
 li{{margin-bottom:8px}}
 .nogo li{{margin-bottom:6px}}
 hr{{border:0;border-top:1px solid var(--line);margin:52px 0}}
-footer{{border-top:1px solid var(--line);margin-top:56px;padding-top:26px;color:var(--dim);font-size:14px}}
-footer a{{font-weight:600}}
-.toc{{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:16px 20px;
+footer{{border-top:1px solid var(--line);margin-top:58px;padding-top:26px;color:var(--dim);font-size:14px}}
+footer a{{font-weight:650}}
+.toc{{background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:17px 21px;
   margin:32px 0 0;font-size:14.5px}}
-.toc ol{{margin:8px 0 0;padding-left:21px;columns:2;column-gap:26px}}
+.toc .lbl{{font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);
+  font-weight:700}}
+.toc ol{{margin:9px 0 0;padding-left:21px;columns:2;column-gap:26px}}
 .toc li{{margin-bottom:4px;break-inside:avoid}}
 @media (max-width:560px){{.toc ol{{columns:1}}}}
 </style>
 </head>
 <body>
+<div class="mast">
+  <div class="mast-in">
+    <div class="kicker">FlyRank ML Internship &middot; Capstone</div>
+    <h1>Which web pages are about to lose search traffic?</h1>
+    <p class="byline">A forward validated ranking of pages likely to lose search impressions next month,
+    and the review queue built on top of it. Decision support, not prediction of Google.</p>
+    <div class="chips">
+      <span class="chip"><b>Track</b> Machine Learning</span>
+      <span class="chip"><b>Lane</b> Refresh and Content Opportunity Scoring</span>
+      <span class="chip"><b>Window</b> 2026-03 to 2026-06</span>
+      <span class="chip"><b>Clients</b> {P['LIVE']['clients']} anonymised</span>
+    </div>
+  </div>
+</div>
+<div class="mint-band"></div>
 <div class="wrap">
-
-<header>
-  <div class="kicker">FlyRank ML Internship &middot; Capstone &middot; Refresh and Content Opportunity Scoring</div>
-  <h1>Which web pages are about to lose search traffic?</h1>
-  <p class="byline">A forward validated ranking of pages likely to lose search impressions next month,
-  and the review queue built on top of it. Decision support, not prediction of Google.</p>
-</header>
 
 <div class="abstract">
   <span class="lbl">Abstract</span>
@@ -262,7 +294,7 @@ footer a{{font-weight:600}}
 </div>
 
 <nav class="toc">
-  <b>Sections</b>
+  <span class="lbl">Sections</span>
   <ol>
     <li><a href="#intro">Problem statement</a></li>
     <li><a href="#data">Data</a></li>
@@ -409,7 +441,7 @@ month's total, and momentum compares the two halves of that same total, so they 
     <td class="small">Ranking quality survives when the shared arithmetic term is broken.</td></tr>
 </tbody></table></div>
 
-<div class="callout">
+<div class="callout mint">
   <span class="lbl">This test cost me a claim</span>
   <p>The decoupled label kept the AUC intact but <b>inverted the direction</b> of the momentum effect. Under
   the original label a page falling within the month is likelier to decline; under a label that shares no
@@ -482,8 +514,8 @@ pipeline is deterministic rather than the claim that it is.</p>
 <p>The forest is uncalibrated and nothing here calibrates it. Across ten equal size buckets of out of fold
 scores the observed decline rate runs from {f3(calib_lo['observed_decline'])} in the lowest bucket to
 {f3(calib_hi['observed_decline'])} in the highest, so the two ends separate clearly. It does not rise
-monotonically: {len(dips)} bucket{'s sit' if len(dips) != 1 else ' sits'} below the bucket beneath
-{'them' if len(dips) != 1 else 'it'}. Adjacent buckets are therefore not reliably ordered, and only the
+monotonically: {len(dips)} of the {len(obs) - 1} steps from one bucket to the next
+{'goes' if len(dips) == 1 else 'go'} the wrong way. Adjacent buckets are therefore not reliably ordered, and only the
 broad direction is.</p>
 
 <p>The level is further off than the ordering. {"Every bucket's" if all_under else "Nearly every bucket's"}
@@ -540,7 +572,7 @@ Around {n(norec_decliners)} of those pages did decline, and the queue never ment
 support it rather than an oversight, and it is the first number to put in front of anyone who proposes
 lowering the floor.</p>
 
-<div class="callout">
+<div class="callout mint">
   <span class="lbl">What would change my mind</span>
   <p>If forward AUC on a new pair falls within 0.05 of the frozen rule, the model is not earning its
   complexity and the rule should ship instead. If a review log ever shows reviewers disagreeing with the
